@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+     "eject": "react-scripts eject",
+    "deploy": "npm run build && vercel --prod --confirm"
   },
   "dependencies": {
     "axios": "^1.8.4",
