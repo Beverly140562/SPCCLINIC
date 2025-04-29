@@ -26,49 +26,39 @@ const Appointment = () => {
   }
 
 
-    const getAvailableSlots = async () => {
-      setDocSlots([])
-
-      // getting current date
-
-      let today = new Date()
-
-      for (let i = 0; i < 7; i++) {
-        // getting the date with index
-        let currentDate = new Date(today);
-        currentDate.setDate(today.getDate() + i)
-
-        // setting end time of the date with index
-        let endTime = new Date(today)
-        endTime.setDate(today.getDate() + 1)
-        endTime.setHours(17, 0, 0, 0) // end 5pm
-
-        // setting hours
-        if (today.getDate() === currentDate.getDate()) {
-          currentDate.setHours(currentDate.getHours() > 8 ? currentDate.getHours() + 1 : 8)
-          currentDate.setMinutes(currentDate.getMinutes() > 30 ? 30 : 0)
-        } else {
-          currentDate.setHours(8);
-          currentDate.setMinutes(0);
-        }
-
-        let timeSlots = []
-
-        while (currentDate < endTime) {
-          let formattedTime = currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          
-          // add slot to array
-          timeSlots.push({
-          datetime: new Date(currentDate),
-          time: formattedTime
-        })
-
-        // current time by 30 minutes
-        currentDate.setMinutes(currentDate.getMinutes() + 30)
+  const getAvailableSlots = async () => {
+    setDocSlots([]); // reset previous slots
+  
+    const today = new Date();
+  
+    for (let i = 0; i < 7; i++) { // check next 7 days
+      const currentDate = new Date(today);
+      currentDate.setDate(today.getDate() + i);
+  
+      const dayOfWeek = currentDate.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
+  
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        continue; // skip weekends
       }
-      setDocSlots(prev => ([...prev, timeSlots]))
+  
+      const slots = [];
+      const start = new Date(currentDate.setHours(8, 0, 0, 0)); // 8:00 AM
+      const end = new Date(currentDate.setHours(17, 0, 0, 0));  // 5:00 PM
+  
+      const slotTime = new Date(start);
+  
+      while (slotTime < end) {
+        slots.push({
+          datetime: new Date(slotTime),
+          time: slotTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        });
+        slotTime.setMinutes(slotTime.getMinutes() + 30);
+      }
+  
+      setDocSlots(prev => [...prev, slots]);
     }
-  }
+  };
+  
 
 
   const bookAppointment = async () => {

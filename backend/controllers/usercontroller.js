@@ -8,17 +8,17 @@ const registerUser = async (req, res) => {
     const { name, email, password, phone, address, dob } = req.body;
 
     if (!name || !email || !password) {
-      return res.status(400).json({ success: false, message: 'Missing required fields' });
+      return res.json({ success: false, message: 'Missing required fields' });
     }
 
     // validating the email
     if (!validator.isEmail(email)) {
-      return res.status(400).json({ success: false, message: 'Invalid email format' });
+      return res.json({ success: false, message: 'Invalid email format' });
     }
 
     // validating the strong password
     if (password.length < 8) {
-      return res.status(400).json({ success: false, message: 'Password must be at least 8 characters' });
+      return res.json({ success: false, message: 'Password must be at least 8 characters' });
     }
 
     // validating the hashing password
@@ -52,7 +52,7 @@ const registerUser = async (req, res) => {
       return res.json({ success: false, message: 'User ID not found after signup' });
     }
 
-    // Insert additional profile info into `students` table
+    // Insert additional profile info into students table
     const data = await supabase.from('students').insert([
       {
         student_id: student_id,
@@ -126,18 +126,18 @@ const bookAppointment = async (req, res) => {
       .single();
 
     if (studentError || doctorError || !studentData || !doctorData) {
-      return res.status(404).json({ success: false, message: 'Doctor or student not found' });
+      return res.json({ success: false, message: 'Doctor or student not found' });
     }
 
     if (!doctorData.available) {
-      return res.status(400).json({ success: false, message: 'Doctor not available' });
+      return res.json({ success: false, message: 'Doctor not available' });
     }
 
     let slots_booked = doctorData.slots_booked || {};
 
     // Check slot availability
     if (slots_booked[slotDate] && slots_booked[slotDate].includes(slotTime)) {
-      return res.status(400).json({ success: false, message: 'Slot not available' });
+      return res.json({ success: false, message: 'Slot not available' });
     }
 
     // Update slots_booked
@@ -167,7 +167,7 @@ const bookAppointment = async (req, res) => {
     ]);
 
     if (insertError) {
-      return res.status(500).json({ success: false, message: 'Failed to create appointment', error: insertError.message });
+      return res.json({ success: false, message: 'Failed to create appointment', error: insertError.message });
     }
 
     // Update doctor's booked slots
@@ -177,10 +177,10 @@ const bookAppointment = async (req, res) => {
       .eq('doctor_id', doctor_id);
 
     if (updateError) {
-      return res.status(500).json({ success: false, message: 'Appointment created but failed to update doctor slots' });
+      return res.json({ success: false, message: 'Appointment created but failed to update doctor slots' });
     }
 
-    return res.status(201).json({ success: true, message: 'Appointment booked successfully', data: newAppointment });
+    return res.json({ success: true, message: 'Appointment booked successfully', data: newAppointment });
   } catch (error) {
     console.error( error);
     return res.json({ success: false, message:error.message });

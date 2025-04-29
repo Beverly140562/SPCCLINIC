@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import { addDoctor, allDoctors, loginAdmin } from "../controllers/adminController.js"; // ✅ correct path
+import { addDoctor, allDoctors, loginAdmin } from "../controllers/adminController.js";
 import authAdmin from "../middlewares/authAdmin.js";
 import { changeAvailability } from "../controllers/doctorController.js";
 

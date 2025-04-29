@@ -1,112 +1,125 @@
 import supabase from '../config/supabaseClient.js';
 
-
+// Fetch doctors 
 const getDoctors = async (req, res) => {
-  const { page = 1, limit = 5 } = req.query;  // Make sure you're sending page and limit
-  const offset = (page - 1) * limit;
-
+ 
   try {
-    console.log('Request received:', req.headers['authorization']);  // Log token
+    console.log('Request received:', req.headers['authorization']);  // Log token for debugging
 
-    // Fetch data
+    // Fetch doctors 
     const { data: doctors, error: fetchError } = await supabase
       .from('doctors')
       .select('*')
-      .range(offset, offset + limit - 1);
+      
 
     if (fetchError) {
       console.error("Error fetching doctors:", fetchError);
-      return res.status(500).json({ message: 'Error fetching doctors' });
+      return res.json({ message: 'Error fetching doctors' });
     }
 
+    // Count the total number of doctors 
     const { data: totalData, error: countError } = await supabase
       .from('doctors')
       .select('doctor_id', { count: 'exact' });
 
     if (countError) {
       console.error("Error fetching count:", countError);
-      return res.status(500).json({ message: 'Error counting doctors' });
+      return res.json({ message: 'Error counting doctors' });
     }
 
-    res.status(200).json({
+    res.json({
       success: true,
       doctors,
-      total: totalData.length,
+      total: totalData.length,  // Return the total number of doctors
     });
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ message: 'Error fetching doctors' });
+    res.json({ message: 'Error fetching doctors' });
   }
 };
 
-
-
-export const addDoctor = async (req, res) => {
-  try {
-    
-    // your logic here
-    res.status(201).json({ message: 'Doctor added' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error adding doctor' });
-  }
-};
-
-
+// Change doctor's availability
 const changeAvailability = async (req, res) => {
-  console.log("Availability change request received for:", req.body.doctor_id);
+  console.log("Availability change request received for doctor ID:", req.body.doctor_id);
 
   try {
     const { doctor_id } = req.body;
 
-    const { data: doctors, error: fetchError } = await supabase
+    // Fetch the current available of the doctor
+    const { data: doctor, error: fetchError } = await supabase
       .from('doctors')
       .select('available')
       .eq('doctor_id', doctor_id)
-      .single();
+      .single();  //  single row for doctor should be unique id
 
-    if (fetchError || !doctors) {
-      return res.status(404).json({ success: false, message: 'Doctor not found' });
+    if (fetchError || !doctor) {
+      console.error("Error fetching doctor:", fetchError);
+      return res.json({ success: false, message: 'Doctor not found' });
     }
 
-    const newAvailability = !doctors.available;
+    // current available for debugging purposes
+    console.log("Current availability for doctor:", doctor.available);
 
+    // Toggle the availability: If available is true, set it to false, and vice versa
+    const newAvailability = !doctor.available;
+    console.log("New availability for doctor:", newAvailability);
+
+    // Update the doctor's availability in the database
     const { error: updateError } = await supabase
       .from('doctors')
-      .update({ available: newAvailability })
-      .eq('doctor_id', doctor_id);
+      .update({ available: newAvailability })  // Update the availability field
+      .eq('doctor_id', doctor_id);  // Target the specific doctor by doctor_id
 
     if (updateError) {
-      return res.status(500).json({ success: false, message: updateError.message });
+      console.error("Error updating doctor availability:", updateError);
+      return res.json({ success: false, message: updateError.message });
     }
 
-    res.json({ success: true, message: 'Availability updated' });
+    // Successfully updated, respond with the new availability
+    console.log("Availability updated successfully.");
+    res.json({
+      success: true,
+      message: 'Availability updated',
+      newAvailability,
+      doctor_id,  // Include the doctor_id and updated status for confirmation
+    });
   } catch (error) {
     console.error('Error in changeAvailability:', error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.json({ success: false, message: error.message });
   }
 };
 
-// Route /api/doctor/list?doctor_id
 
 const doctorList = async (req, res) => {
   try {
-    const { data: doctors, error } = await supabase
+    const { page = 1, limit = 10 } = req.query;  
+    const offset = (page - 1) * limit;
+
+    // Fetch the doctors 
+    const { data: doctors, error: fetchError } = await supabase
       .from('doctors')
-      .select('doctor_id, name, image, speciality, available, experience');
-      
-    if (error) throw error; // This will trigger if there is an error with the query.
+      .select('doctor_id, name, image, speciality, available, experience')
+      .range(offset, offset + limit - 1);
 
-    if (!doctors || doctors.length === 0) {
-      return res.status(404).json({ success: false, message: 'No doctors found' });
-    }
+    if (fetchError) throw fetchError;
 
-    res.json({ success: true, doctors });
+    // total count of doctors
+    const { data: totalData, error: countError } = await supabase
+      .from('doctors')
+      .select('doctor_id', { count: 'exact' });
+
+    if (countError) throw countError;
+
+    res.json({
+      success: true,
+      doctors,
+      total: totalData.length, // Return total count 
+    });
   } catch (error) {
-    console.error('Error fetching doctors:', error); 
-    res.status(500).json({ success: false, message: error.message, stack: error.stack });
+    console.error('Error fetching doctors:', error);
+    res.json({ success: false, message: error.message });
   }
 };
 
-
-
+// Fetch list of doctors with details
 export { getDoctors, changeAvailability, doctorList };

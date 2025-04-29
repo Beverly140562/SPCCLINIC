@@ -37,21 +37,21 @@ const AdminProvider = (props) => {
         toast.error("Session expired. Please log in again.");
         localStorage.removeItem('aToken');
         setAToken('');
-        // Optionally redirect to login page
+        // Optional redirect to login page
         window.location.href = '/admin/login';
       } else {
         toast.error("Failed to fetch doctors: " + (error.response?.data?.message || error.message));
       }
     }
   };
-  
+
   const changeAvailability = async (doctor_id) => {
     console.log("Request URL:", `${backendUrl}/api/admin/change-availability`);
 
     try {
       const { data } = await axios.post(
         `${backendUrl}/api/admin/change-availability`,
-        {doctor_id},
+        { doctor_id },
         {
           headers: {
             Authorization: `Bearer ${aToken}`,
@@ -61,22 +61,30 @@ const AdminProvider = (props) => {
   
       if (data.success) {
         toast.success(data.message);
-        getAllDoctors(); // refresh list
+        
+        // update the availability of the doctor 
+        setDoctors((prevDoctors) =>
+          prevDoctors.map((doctor) =>
+            doctor.doctor_id === doctor_id
+              ? { ...doctor, available: !doctor.available }
+              : doctor
+          )
+        );
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message)
+      toast.error("Error changing availability: " + (error.message || error.response?.data?.message));
     }
   };
   
-
   const value = {
     aToken,
     setAToken,
     backendUrl,
     doctors,
-    getAllDoctors, changeAvailability,
+    getAllDoctors, 
+    changeAvailability,
   };
 
   return (

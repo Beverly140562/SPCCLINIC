@@ -18,13 +18,13 @@ const addDoctor = async (req, res) => {
       about,
       speciality,
       degree,
-      address, // JSON string from frontend
+      address, // JSON string from admin
       available,
     } = req.body;
 
     const docImg = req.file;
 
-    // === Validation ===
+    // Validation
     if (
       !name || !email || !password || !experience || !fees ||
       !about || !speciality || !degree || !address || !docImg
@@ -41,7 +41,7 @@ const addDoctor = async (req, res) => {
       return res.status(400).json({ success: false, message: "Address must have line1 and line2" });
     }
 
-    // === Check for Existing Doctor ===
+    //  Check for Existing Doctor 
     const { data: existingDoctor } = await supabase
       .from("doctors")
       .select("*")
@@ -52,15 +52,15 @@ const addDoctor = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email already registered" });
     }
 
-    // === Hash Password ===
+    //  Hash Password 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // === Upload to Cloudinary ===
+    //  Upload to Cloudinary 
     const uploadedImage = await cloudinary.uploader.upload(docImg.path, {
       folder: "clinic/doctors",
     });
 
-    // === Prepare Data ===
+    //  Data of the doctor
     const doctorData = {
       name,
       email,
@@ -76,7 +76,7 @@ const addDoctor = async (req, res) => {
      
     };
 
-    // === Insert into Supabase ===
+    //  Insert into Supabase 
     const { error } = await supabase.from("doctors").insert([doctorData]);
 
     if (error) {
@@ -99,7 +99,7 @@ const loginAdmin = async (req, res) => {
     const { email, password } = req.body;
 
     if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
-      // It's a good idea to use more secure data in the payload, not just email+password
+      // secure data, not just email+password
       const token = jwt.sign({ email, role: "admin" }, process.env.JWT_SECRET, { expiresIn: "1h" });
       res.json({ success: true, token });
     } else {
@@ -114,7 +114,7 @@ const loginAdmin = async (req, res) => {
 //API to get all doctors list for admin panel
 const allDoctors = async (req, res) => {
   try {
-    // Optional: Add authorization check here if needed
+   
 
     const { data: doctors, error } = await supabase
       .from('doctors')

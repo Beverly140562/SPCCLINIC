@@ -16,17 +16,17 @@ const bookAppointment = async (req, res) => {
       .single();
 
     if (studentError || doctorError || !studentData || !doctorData) {
-      return res.status(404).json({ success: false, message: 'Doctor or student not found' });
+      return res.json({ success: false, message: 'Doctor or student not found' });
     }
 
     if (!doctorData.available) {
-      return res.status(400).json({ success: false, message: 'Doctor not available' });
+      return res.json({ success: false, message: 'Doctor not available' });
     }
 
     let slots_booked = doctorData.slots_booked || {};
 
     if (slots_booked[slotDate] && slots_booked[slotDate].includes(slotTime)) {
-      return res.status(400).json({ success: false, message: 'Slot not available' });
+      return res.json({ success: false, message: 'Slot not available' });
     }
 
     // Update slots_booked
@@ -35,7 +35,7 @@ const bookAppointment = async (req, res) => {
     }
     slots_booked[slotDate].push(slotTime);
 
-    // Remove slots_booked from doctorData before saving it in appointment
+    // Remove slots_booked from doctorData before saving in appointment
     const { slots_booked: _, ...doctorDataForAppointment } = doctorData;
 
     // Insert appointment
@@ -56,7 +56,7 @@ const bookAppointment = async (req, res) => {
     ]);
 
     if (insertError) {
-      return res.status(500).json({ success: false, message: 'Failed to create appointment', error: insertError.message });
+      return res.json({ success: false, message: 'Failed to create appointment', error: insertError.message });
     }
 
     // Update doctor's booked slots
@@ -66,12 +66,12 @@ const bookAppointment = async (req, res) => {
       .eq('doctor_id', doctor_id);
 
     if (updateError) {
-      return res.status(500).json({ success: false, message: 'Appointment created but failed to update doctor slots' });
+      return res.json({ success: false, message: 'Appointment created but failed to update doctor slots' });
     }
 
-    return res.status(201).json({ success: true, message: 'Appointment booked successfully', data: newAppointment });
+    return res.json({ success: true, message: 'Appointment booked successfully', data: newAppointment });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.json({ success: false, message: error.message });
   }
 };

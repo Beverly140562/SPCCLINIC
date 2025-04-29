@@ -150,7 +150,7 @@ const AddDoctor = () => {
                 autoComplete="new-password"
                 id="password"
                 name="password"
-                required
+                required hidden
               />
             </div>
 
