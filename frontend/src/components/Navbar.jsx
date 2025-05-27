@@ -1,57 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import { useState} from 'react';
 import { assets } from '../assets/assets';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { UserAuth } from '../context/AuthContext';
-import { supabase } from '../supabaseClient'; 
+import { useContext } from 'react';
+import { AppContext } from '../context/AppContext';
+
 
 const Navbar = () => {
-  const { session, signOut } = UserAuth();
+
   const navigate = useNavigate();
-  const [profilePic, setProfilePic] = useState(null); 
 
-  // 🔹 Fetch user profile when session is available
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (session?.user?.id) {
-        const { data, error } = await supabase
-          .from("students")
-          .select("image")
-          .eq("student_id", session.user.id)
-          .single(); 
-
-          
-
-          if (data && data.image) {
-            // Get the public URL for the image from Supabase storage
-            const { data: imageUrlData } = supabase.storage
-              .from("profile.pics")
-              .getPublicUrl(data.image);
-    
-            if (imageUrlData?.publicUrl) {
-              setProfilePic(imageUrlData.publicUrl); // Set the public URL
-            }
-          } else {
-            console.error("Error fetching user profile:", error);
-          }
-        }
-    };
-
-    fetchUserProfile();
-  }, [session]);
-
-  
   const [showMenu, setShowMenu] = useState(false);
+  const { token, setToken,userData } = useContext(AppContext);
 
-  const handleSignOut = async (e) => {
-    e.preventDefault();
-    try {
-      await signOut();
-      navigate('/');
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
+  const logout = () => {
+    setToken(false)
+    localStorage.removeItem('token')
+    navigate('/login');
+  }
 
   return (
     <div className='flex justify-between items-center text-sm py-4 mb-5 border-b border-gray-400 px-5'>
@@ -60,35 +26,35 @@ const Navbar = () => {
         <img onClick={() => navigate('/')} className='h-10' src={assets.logo} alt="SPC Dental Clinic Logo" />
         <span className='text-2xl font-semibold text-red-600'>SPC Dental Clinic</span>
       </div>
-
-  
-      <ul className='hidden md:flex items-center gap-5 font-medium'>
-        {["/", "/doctors", "/about", "/contact"].map((path, index) => {
-          const labels = ["HOME", "ALL DOCTORS", "ABOUT", "CONTACT"];
-          return (
-            <li key={path} className="flex flex-col items-center">
-              <NavLink
-                to={path}
-                className={({ isActive }) =>
-                  `hover:text-blue-500 transition ${isActive ? "text-blue-600 font-semibold border-b-2 border-blue-600" : ""}`
-                }
-              >
-                {labels[index]}
-              </NavLink>
-            </li>
-          );
-        })}
+      <ul className='hidden md:flex items-start gap-5 font-medium'>
+        <NavLink to='/'>
+        <p className='py-1'>HOME</p>
+        <hr className='border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden' />
+        </NavLink>
+        <NavLink to='/doctors'>
+        <p className='py-1'>ALL DOCTORS</p>
+        <hr className='border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden' />
+        </NavLink>
+        <NavLink to='/about'>
+        <p className='py-1'>ABOUT</p>
+        <hr className='border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden' />
+        </NavLink>
+        <NavLink to='/contact'>
+        <p className='py-1'>CONTACT</p>
+        <hr className='border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden' />
+        </NavLink>
       </ul>
 
  
       <div className='flex items-center gap-4'>
-        {session ? (
+        { 
+        token 
+         ? 
           <div className='flex items-center gap-2 cursor-pointer group relative'>
             
             <img
               className='w-10 h-10 rounded-full object-cover'
-              src={profilePic || assets.profile_pic}
-              alt="Profile"
+              src={userData?.image || "/default-profile.png"} alt="profile"
             />
 
             <img className='w-5' src={assets.dropdown} alt="Dropdown" />
@@ -96,15 +62,15 @@ const Navbar = () => {
               <div className='min-w-48 bg-stone-100 rounded flex flex-col gap-4 p-4'>
                 <p onClick={() => navigate('/my-profile')} className='hover:text-black cursor-pointer'>My Profile</p>
                 <p onClick={() => navigate('/my-appointments')} className='hover:text-black cursor-pointer'>My Appointments</p>
-                <p onClick={handleSignOut} className='hover:text-black cursor-pointer'>Logout</p>
+                <p onClick={logout} className='hover:text-black cursor-pointer'>Logout</p>
               </div>
             </div>
           </div>
-        ) : (
+         : 
           <button onClick={() => navigate('/login')} className='bg-blue-600 text-white px-6 py-2 rounded-full font-light hidden md:block hover:bg-blue-700 transition'>
             Create Account
           </button>
-        )}
+        }
         <img onClick={() => setShowMenu(true)} className='w-6 md:hidden' src={assets.menu_icon} alt='Menu' />
 
         {/* Mobile Menu */}

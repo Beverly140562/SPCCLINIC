@@ -5,8 +5,10 @@ import { toast } from 'react-toastify';
 export const AdminContext = createContext();
 
 const AdminProvider = (props) => {
-  const [aToken, setAToken] = useState(localStorage.getItem('aToken') || '');
+  const [aToken, setAToken] = useState(localStorage.getItem('aToken') );
   const [doctors, setDoctors] = useState([]);
+  const [appointments,setAppointments] = useState([])
+  const [dashData, setDashData] = useState(false)
   
   const backendUrl = import.meta.env.VITE_BACKEND_URL; // Ensure correct .env setup
 
@@ -77,6 +79,76 @@ const AdminProvider = (props) => {
       toast.error("Error changing availability: " + (error.message || error.response?.data?.message));
     }
   };
+
+  const getAllAppointments = async (doctor_id, slotDate) => {
+  if (!doctor_id || !slotDate) {
+    toast.error("Please select both doctor and date before fetching appointments");
+    return;
+  }
+
+  try {
+    const { data } = await axios.get(`${backendUrl}/api/admin/appointments`, {
+      headers: { Authorization: `Bearer ${aToken}` },
+      params: { doctor_id, slotDate },  // <-- pass these as query params!
+    });
+
+    if (data.success) {
+      setAppointments(data.appointments);
+      console.log("Appointments fetched:", data.appointments);
+    } else {
+      toast.error(data.message);
+    }
+  } catch (error) {
+    toast.error("Error fetching appointments: " + (error.response?.data?.message || error.message));
+  }
+};
+
+const cancelAppointment = async (appointment_id, doctor_id, slotDate) => {
+  if (!doctor_id || !slotDate) {
+    toast.error("Please select both doctor and date before canceling an appointment.");
+    return;
+  }
+
+  try {
+    const { data } = await axios.post(
+      backendUrl + '/api/admin/cancel-appointment',
+      { appointment_id },
+      { headers: { Authorization: `Bearer ${aToken}` } }
+    );
+
+    if (data.success) {
+      toast.success(data.message);
+      getAllAppointments(doctor_id, slotDate);
+    } else {
+      toast.error(data.message);
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.message || error.message);
+  }
+};
+
+const getDashData = async () => {
+  try {
+    const { data } = await axios.get(backendUrl + '/api/admin/dashboard', {
+      headers: { Authorization: `Bearer ${aToken}` },
+    });
+
+    if (data.success) {
+      setDashData(data.dashboard); // ✅ Use "dashboard" not "dashData"
+      console.log(data.dashboard);
+    } else {
+      toast.error(data.message);
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.message || error.message);
+  }
+};
+
+
+
+
+
+
   
   const value = {
     aToken,
@@ -85,6 +157,10 @@ const AdminProvider = (props) => {
     doctors,
     getAllDoctors, 
     changeAvailability,
+    appointments,setAppointments,
+    getAllAppointments,
+    cancelAppointment,
+    dashData,getDashData
   };
 
   return (

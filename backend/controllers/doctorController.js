@@ -1,4 +1,6 @@
-import supabase from '../config/supabaseClient.js';
+import supabase from "../config/supabaseClient.js";
+import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
 
 // Fetch doctors 
 const getDoctors = async (req, res) => {
@@ -121,5 +123,39 @@ const doctorList = async (req, res) => {
   }
 };
 
-// Fetch list of doctors with details
-export { getDoctors, changeAvailability, doctorList };
+// API doctor login 
+const loginDoctor = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Fetch the doctor using the provided email
+    const { data: doctor, error } = await supabase
+      .from("doctors")
+      .select("*") // you need password and doctor_id too
+      .eq("email", email)
+      .single();
+
+    // Check if the doctor exists
+    if (error || !doctor) {
+      return res.json({ success: false, message: "Invalid credentials" });
+    }
+
+    // Compare passwords
+    const isMatch = await bcrypt.compare(password, doctor.password);
+
+    if (isMatch) {
+      const token = jwt.sign({ id: doctor.doctor_id }, JWT_SECRET);
+      res.json({ success: true, token });
+    } else {
+      res.json({ success: false, message: "Invalid credentials" });
+    }
+
+  } catch (error) {
+    console.error('Error logging in doctor:', error);
+    res.json({ success: false, message: "Server error" });
+  }
+};
+
+// API to get doctor 
+
+export { getDoctors, changeAvailability, doctorList, loginDoctor };

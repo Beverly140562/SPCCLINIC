@@ -5,6 +5,7 @@ import { AdminContext } from '../../context/AdminContext';
 import { assets } from '../../assets/assets';
 
 const AddDoctor = () => {
+  
   const { aToken } = useContext(AdminContext);
   
 
@@ -26,6 +27,8 @@ const AddDoctor = () => {
 
 
     try {
+
+
       const formData = new FormData();
       formData.append('image', docImg);
       formData.append('name', name);
@@ -40,12 +43,12 @@ const AddDoctor = () => {
       formData.append('address', JSON.stringify({ line1: address1, line2: address2 }));
 
       const { data } = await axios.post(
-        'http://localhost:4000/api/doctors/add-doctor',
+        'http://localhost:4000/api/doctor/add-doctor',
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
-            "atoken": aToken,
+             Authorization: `Bearer ${aToken}`,
+        'Content-Type': 'multipart/form-data',
           },
         }
       );
@@ -150,7 +153,7 @@ const AddDoctor = () => {
                 autoComplete="new-password"
                 id="password"
                 name="password"
-                required hidden
+                required
               />
             </div>
 

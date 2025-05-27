@@ -1,3 +1,4 @@
+
 const bookAppointment = async (req, res) => {
   try {
     const { student_id, doctor_id, slotDate, slotTime } = req.body;
@@ -75,3 +76,4 @@ const bookAppointment = async (req, res) => {
     return res.json({ success: false, message: error.message });
   }
 };
+

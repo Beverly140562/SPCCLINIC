@@ -28,22 +28,8 @@ const Doctors = () => {
       <p className='text-gray-600'>Browse doctors by speciality.</p>
 
       <div className='flex flex-col sm:flex-row items-start gap-5 mt-5'>
-        <button
-          className={`py-1 px-3 border rounded text-sm transition-all sm:hidden ${showFilter ? 'bg-primary text-white' : ''}`}
-          onClick={() => setShowFilter((prev) => !prev)}
-        >
-          Filters
-        </button>
-
-        <div className={`flex-col gap-4 text-sm text-gray-600 ${showFilter ? 'flex' : 'hidden sm:flex'}`}>
-          <button
-            onClick={() => navigate(speciality === 'dentist' ? '/doctors' : '/doctors/dentist')}
-            className={`w-[94vw] sm:w-auto pl-3 py-1.5 border border-gray-300 rounded transition-all cursor-pointer ${
-              speciality === 'dentist' ? 'bg-indigo-100 text-black' : ''
-            }`}
-          >
-            General Dentist
-          </button>
+        <div className="flex-col gap-4 text-sm text-gray-600">
+          <p onClick={() => speciality === 'General Dentist' ? navigate ('/doctors') : navigate('/doctors/General Dentist')} className={`w-[94vw] sm:w-auto pl-3 py-1.5 pr-16 border border-gray-300 rounded transition-all cursor-pointer ${speciality === "General Dentist" ? "bg-indigo-100 text-black" : ""} `}>General Dentist</p>
         </div>
 
         <div className='w-full grid grid-cols-auto gap-4 gap-y-6'>

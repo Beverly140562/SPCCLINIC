@@ -1,16 +1,16 @@
 import express from 'express'
-import { registerUser,loginUser, bookAppointment } from '../controllers/usercontroller.js'
-import authAdmin from '../middlewares/authAdmin.js'
+import { registerUser,loginUser, bookAppointment, getProfile, updateProfile, listAppointment, cancelAppointments } from '../controllers/usercontroller.js'
+import upload from '../middlewares/multer.js'
+import verifyToken from '../middlewares/verifyToken.js'
+const studentRouter = express.Router()
 
-const router = express.Router()
+studentRouter.post('/signup',registerUser)
+studentRouter.post('/login',loginUser)
+studentRouter.post('/book-appointment', verifyToken, bookAppointment);
 
-router.post('/register',registerUser)
-router.post('/login',loginUser)
+studentRouter.get('/profile',verifyToken,getProfile);
+studentRouter.post('/update-profile',verifyToken,upload.single('image'),updateProfile);
+studentRouter.get('/appointments', verifyToken, listAppointment)
+studentRouter.post('/cancel-appointment',verifyToken,cancelAppointments)
 
-router.post('/book-appointment',authAdmin,bookAppointment)
-
-
-
-
-
-export default router;
+export default studentRouter;

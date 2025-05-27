@@ -1,19 +1,23 @@
 import express from 'express';
 import { addDoctor } from '../controllers/adminController.js';
-import { getDoctors } from '../controllers/doctorController.js';
+import { getDoctors, loginDoctor } from '../controllers/doctorController.js';
 import upload from '../middlewares/multer.js'; 
 import { doctorList } from '../controllers/doctorController.js';
-const router = express.Router();
+import authAdmin from '../middlewares/authAdmin.js';
+
+const doctorRouter = express.Router();
 
 // Add doctor with image upload
-router.post('/add-doctor', upload.single("image"), addDoctor);
+doctorRouter.post('/add-doctor', upload.single("image"),authAdmin, addDoctor);
 
 // Get all doctors
-router.get('/all', getDoctors);
-router.get('/list', doctorList )
+doctorRouter.get('/all', getDoctors);
+doctorRouter.get('/list', doctorList )
+doctorRouter.post('/login',loginDoctor)
+
 
 
   
 
   
-export default router;
+export default doctorRouter;
