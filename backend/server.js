@@ -5,6 +5,7 @@ import doctorRouter from "./routes/doctorRoutes.js";
 import router from "./routes/adminRoutes.js";
 import studentRouter from "./routes/studentRoutes.js";
 import studentRoutes from "./routes/studentRoutes.js";
+import doctorRoutes from "./routes/doctorRoutes.js";
 dotenv.config();
 
 // app config
@@ -19,7 +20,7 @@ app.use("/api/admin", router);
 app.use("/api/doctor", doctorRouter);
 app.use('/api/user', studentRoutes); // ✅ Make sure path is correct
 app.use('/api/student', studentRouter);
-
+app.use('/api/doctor', doctorRoutes);
 
 app.get('/', (req, res) => {
   res.send("Backend is running!");

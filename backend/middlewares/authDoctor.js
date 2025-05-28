@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
 
-// doctor authencation middleware
 
 const authDoctor = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -13,16 +12,14 @@ const authDoctor = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-     if (!decoded.doctor_id) {
-  return res.status(400).json({ success: false, message: 'User ID missing' });
-}
-req.doctor_id = decoded;
+console.log("Decoded doctor token:", decoded);
+req.doctor_id = decoded.doctor_id;
 
     next();
   } catch (err) {
     return res.status(403).json({ success: false, message: "Invalid token" });
   }
 };
+
 
 export default authDoctor;

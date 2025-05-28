@@ -161,6 +161,7 @@ const { data, error } = await supabase
     appointment_id,
     status,
     slotDate,
+    slotTime,
     cancelled,
     docData:doctors(name, fees, image),
     userData:students(name, image,dob)
@@ -274,6 +275,7 @@ const adminDashboard = async (req, res) => {
         appointment_id,
         status,
         slotDate,
+        slotTime,
         cancelled,
         doctor_id,
         student_id,

@@ -15,12 +15,6 @@ const AllAppointments = () => {
     }
   }, [aToken, selectedDoctor, selectedDate]);
 
-  // Helper function to format date/time nicely
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '-';
-    const dt = new Date(dateString);
-    return dt.toLocaleString();
-  };
 
   return (
     <div className='w-full max-w-6xl m-5'>
@@ -88,7 +82,7 @@ const AllAppointments = () => {
               <p className='max-sm:hidden'>{calculateAge(item.userData?.dob || '-')}</p>
 
               {/* Date & Time */}
-              <p>{formatDateTime(item.slotDate)}</p>
+              <p>{(item.slotDate)}, {item.slotTime}</p>
 
               {/* Doctor */}
               
